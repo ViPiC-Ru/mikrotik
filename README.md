@@ -7,6 +7,7 @@
 - `disable-wifi-5g-interfaces.rsc` - Включение всех Wi-Fi 5 GHz интерфейсов.
 - `reconnect-if-gray-address.rsc` - Переподключение к Интернет при получении серого IPv4.
 - `reconnect-internet-interfaces.rsc` - Переподключение всех Интернет интерфейсов.
+- `rotate-ipsec-peer.rsc` - Ротация адреса IPsec пира через NetWatch.
 - `update-discovery-dns.rsc` - Обновление адреса Discovery DNS для IPv6.
 - `update-dns-record.rsc` - Синхронизация DNS с DHCP, IPsec, WireGuard и т.д.
 - `update-or-reboot-system.rsc` - Обновление или перезагрузка устройства.
