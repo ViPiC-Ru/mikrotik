@@ -2,7 +2,7 @@
 
 /system package update;
 check-for-updates;
-:if ([get status] = "New version is available") do={
+:if ([get installed-version] != [get latest-version]) do={
 	:log info "update system";
 	install;
 } else={
