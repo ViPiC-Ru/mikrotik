@@ -19,6 +19,12 @@ export file="$path/startup.rsc" show-sensitive;
 # back system settings
 /system backup;
 save dont-encrypt=yes name="$path/system.backup";
+# back user manager database
+/system package;
+:foreach package in=[find where name=user-manager] do={
+	/user-manager database;
+	save name="$path/user-manager.umb" overwrite=yes;
+};
 # get system information
 /system resource;
 :set architecture [get architecture-name];
