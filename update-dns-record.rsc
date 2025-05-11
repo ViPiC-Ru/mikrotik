@@ -217,6 +217,16 @@
 			};
 		};
 	};
+	:if ($resolution->"type" = "container") do={
+		/interface veth;
+		:foreach address in=[get $interface address] do={
+			:if ([:typeof $address] = "ip6-prefix") do={
+				:set value [get $interface comment];
+				:set value [:pick $value ([:find $value " - "] + 3) [:len $value]];
+				:set IPv6 $value;
+			};
+		};
+	};
 	:if ($resolution->"type" = "self") do={
 		/ipv6 address;
 		:foreach address in=[find where global !disabled !invalid] do={
