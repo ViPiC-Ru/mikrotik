@@ -179,8 +179,11 @@
 		/ip ipsec active-peers;
 		:set peer ($resolution->"id");
 		:set value [get $peer id];
-		:set value [:pick $value ([:find $value "CN="] + 3) [:find $value "."]];
-		:set host "$value.$domain";
+		:set value [:pick $value ([:find $value "CN="] + 3) [:len $value]];
+		:if ([:typeof [:find $value "."]] = "nil") do={
+			:set value "$value.$domain";
+		};
+		:set host "$value";
 	};
 	:if ($resolution->"type" = "wireguard") do={
 		/interface wireguard peers;
