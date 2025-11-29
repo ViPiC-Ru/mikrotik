@@ -22,8 +22,8 @@ save dont-encrypt=yes name="$path/system.backup";
 # back user manager database
 /system package;
 :foreach package in=[find where name=user-manager] do={
-	/user-manager database;
-	save name="$path/user-manager.umb" overwrite=yes;
+    /user-manager database;
+    save name="$path/user-manager.umb" overwrite=yes;
 };
 # get system information
 /system resource;
@@ -33,20 +33,20 @@ save dont-encrypt=yes name="$path/system.backup";
 :set version $value;
 # work with package file
 :if ($isNeedPackage) do={
-	# delete old package file
-	/file;
-	:set isFound false;
-	:foreach file in=[find where name~"$path/" type="package"] do={
-		:set value [get $file package-architecture];
-		:if ([:pick $architecture 0 [:len $value]] = $value && [get $file package-version] = $version) do={
-			:set isFound true;
-		} else={
-			remove [get $file name];
-		};
-	};
-	# download new package file
-	/tool;
-	:if (!$isFound) do={
-		fetch url="https://download.mikrotik.com/routeros/$version/routeros-$version-$architecture.npk" dst-path "$path";
-	};
+    # delete old package file
+    /file;
+    :set isFound false;
+    :foreach file in=[find where name~"$path/" type="package"] do={
+        :set value [get $file package-architecture];
+        :if ([:pick $architecture 0 [:len $value]] = $value && [get $file package-version] = $version) do={
+            :set isFound true;
+        } else={
+            remove [get $file name];
+        };
+    };
+    # download new package file
+    /tool;
+    :if (!$isFound) do={
+        fetch url="https://download.mikrotik.com/routeros/$version/routeros-$version-$architecture.npk" dst-path "$path";
+    };
 };

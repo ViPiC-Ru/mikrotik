@@ -6,6 +6,6 @@
 /interface wifiwave2;
 :log info "$action wireless $filter interfaces";
 :foreach interface in=[find name~$filter configuration.mode=ap] do={
-	:if ($action = "disable") do={ disable $interface };
-	:if ($action = "enable") do={ enable $interface };
+    :if ($action = "disable") do={ disable $interface };
+    :if ($action = "enable") do={ enable $interface };
 };
