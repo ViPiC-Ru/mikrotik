@@ -5,7 +5,7 @@
 	:foreach container in=[find] do={
 		:if ([get $container hostname] = $hostname) do={
 			stop $container;
-			:while ([get $container status] != "stopped") do={
+			:while (![get $container stopped]) do={
 				:delay 1s;
 			};
 			start $container;

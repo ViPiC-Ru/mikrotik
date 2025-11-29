@@ -36,7 +36,7 @@
 		:set resolutions ($resolutions, {{type="wireguard";id=$peer}});
 	};
 	/container;
-	:foreach container in=[find where status=running] do={
+	:foreach container in=[find where running] do={
 		:set resolutions ($resolutions, {{type="container";id=$container}});
 	};
 };
