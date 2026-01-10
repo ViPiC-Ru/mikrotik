@@ -4,7 +4,9 @@
 :foreach hostname in=[:toarray $comment] do={
     :foreach container in=[find] do={
         :if ([get $container hostname] = $hostname) do={
-            stop $container;
+            :if ([get $container running]) do={
+                stop $container;
+            };
             :while (![get $container stopped]) do={
                 :delay 1s;
             };
