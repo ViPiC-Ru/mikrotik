@@ -1,25 +1,29 @@
 # update dns record
 
+/system script run "init-global-values";
+
+:global "DOMAIN_DEFAULT";
+:global "IFACE_SELF";
+
+:local mac;
 :local arp;
 :local peer;
 :local container;
-:local type;
 :local value;
 :local isFound;
-:local interface;
+:local interfaceName;
 :local host;
 :local domain;
+:local type;
 :local IPv4;
 :local IPv6;
-:local MAC;
-
+:local address;
 :local linkNetwork fe80::;
 :local linkMask ffc0::;
-:local script "update-dns-record";
-:local defDomain "{default-dns-domain}";
-:local selfInterface "{interface-for-scan}";
+:local defDomain $"DOMAIN_DEFAULT";
+:local selfInterface $"IFACE_SELF";
 :local resolutions {{type="event"}};
-:local TTL 00:03:00;
+:local ttl 00:03:00;
 
 :if ([:len $user] = 0 && [:len $leaseServerName] = 0) do={
     :set resolutions {{type="self"}};
@@ -35,44 +39,48 @@
     :foreach peer in=[find where comment !disabled] do={
         :set resolutions ($resolutions, {{type="wireguard";id=$peer}});
     };
-    /container;
-    :foreach container in=[find where running] do={
-        :set resolutions ($resolutions, {{type="container";id=$container}});
+    /system package;
+    :foreach package in=[find where name="container" !disabled] do={
+        /container;
+        :foreach container in=[find where running] do={
+            :set resolutions ($resolutions, {{type="container";id=$container}});
+        };
     };
 };
 :foreach resolution in=$resolutions do={
-    :set MAC;
+    :set mac;
+    :set IPv4;
     :set IPv6;
     :set host;
-    :set interface;
+    :set interfaceName;
     :set domain $defDomain;
     # getting mac address
     :if ($resolution->"type" = "arp") do={
         /ip arp;
         :set arp ($resolution->"id");
-        :set MAC [get $arp mac-address];
+        :set mac [get $arp mac-address];
     };
     :if ([:len $leaseActMAC] != 0) do={
-        :set MAC $leaseActMAC;
+        :set mac $leaseActMAC;
     };
-    # getting interface
+    # getting interface name
     :if ($resolution->"type" = "arp") do={
         /ip arp;
         :set arp ($resolution->"id");
-        :set interface [get $arp interface];
+        :set interfaceName [get $arp interface];
     };
     :if ($resolution->"type" = "container") do={
         /container;
         :set container ($resolution->"id");
-        :set interface [get $container interface];
+        :set interfaceName [get $container interface];
     };
     :if ($resolution->"type" = "self") do={
-        :set interface $selfInterface;
+        :set interfaceName $selfInterface;
     };
     :if ([:len $leaseServerName] != 0) do={
         /ip dhcp-server;
         :foreach server in=[find where name=$leaseServerName !disabled] do={
-            :set interface [get $server interface];
+            :set interfaceName [get $server interface];
         };
     };
     # getting ipv4 address
@@ -95,7 +103,7 @@
     };
     :if ($resolution->"type" = "container") do={
         /interface veth;
-        :foreach address in=[get $interface address] do={
+        :foreach address in=[get $interfaceName address] do={
             :if ([:typeof $address] = "ip-prefix") do={
                 :set value [:tostr $address];
                 :set value [:pick $value 0 [:find $value "/"]];
@@ -106,7 +114,7 @@
     :if ($resolution->"type" = "self") do={
         /ip address;
         :foreach address in=[find where !disabled !invalid] do={
-            :if ([get $address interface] = $interface) do={
+            :if ([get $address interface] = $interfaceName) do={
                 :set value [get $address address];
                 :set value [:pick $value 0 [:find $value "/"]];
                 :set IPv4 $value;
@@ -141,7 +149,7 @@
     :if ([:len $leaseBound] != 0) do={
         :if ($leaseBound = 0) do={
             :set IPv4;
-            :set MAC;
+            :set mac;
         };
     };
     :if ([:len $"remote-address"] != 0) do={
@@ -152,17 +160,17 @@
         };
         :if ([:len $value] != 0) do={
             :set IPv4;
-            :set MAC;
+            :set mac;
         };
     };
     # getting host name
-    :if ($resolution->"type" = "arp" && [:len $interface] != 0 && [:len $MAC] != 0) do={
+    :if ($resolution->"type" = "arp" && [:len $interfaceName] != 0 && [:len $mac] != 0) do={
         /ip dhcp-server;
-        :foreach server in=[find where lease-script=$script !disabled] do={
+        :foreach server in=[find where lease-script=[:jobname] !disabled] do={
             /ip dhcp-server;
-            :if ([get $server interface] = $interface) do={
+            :if ([get $server interface] = $interfaceName) do={
                 /ip dhcp-server lease;
-                :foreach lease in=[find where address=$IPv4 mac-address=$MAC server=$server !disabled] do={
+                :foreach lease in=[find where address=$IPv4 mac-address=$mac server=$server !disabled] do={
                     :set value [get $lease host-name];
                     :if ([:len $value] != 0) do={
                         :set host "$value.$domain";
@@ -211,9 +219,9 @@
         :set host "$value.$domain";
     };
     # getting ipv6 address
-    :if ([:len $interface] != 0 && [:len $MAC] != 0) do={
+    :if ([:len $interfaceName] != 0 && [:len $mac] != 0) do={
         /ipv6 neighbor;
-        :foreach neighbor in=[find where mac-address=$MAC interface=$interface address status!=failed] do={
+        :foreach neighbor in=[find where mac-address=$mac interface=$interfaceName address status!=failed] do={
             :set value [get $neighbor address];
             :if (($value & $linkMask) != $linkNetwork) do={
                 :set IPv6 $value;
@@ -222,9 +230,9 @@
     };
     :if ($resolution->"type" = "container") do={
         /interface veth;
-        :foreach address in=[get $interface address] do={
+        :foreach address in=[get $interfaceName address] do={
             :if ([:typeof $address] = "ip6-prefix") do={
-                :set value [get $interface comment];
+                :set value [get $interfaceName comment];
                 :set value [:pick $value ([:find $value " - "] + 3) [:len $value]];
                 :set IPv6 $value;
             };
@@ -233,7 +241,7 @@
     :if ($resolution->"type" = "self") do={
         /ipv6 address;
         :foreach address in=[find where global !disabled !invalid] do={
-            :if ([get $address interface] = $interface) do={
+            :if ([get $address interface] = $interfaceName) do={
                 :set value [get $address address];
                 :set value [:pick $value 0 [:find $value "/"]];
                 :set IPv6 $value;
@@ -245,36 +253,22 @@
         /ip dns static;
         # existing dns records
         :foreach record in=[find where name=$host] do={
+            :set address;
             :set isFound false;
             :set type [get $record type];
-            :if ([:len $type] = 0) do={
-                :set type "A";
-            };
-            :if ($type = "A") do={
-                :if ([:len $IPv4] != 0) do={
-                    :if ([get $record address] != $IPv4) do={
-                        :log info "change $type dns record for $host";
-                        set $record address=$IPv4;
-                    };
-                    :if ([get $record ttl] != $TTL) do={
-                        set $record ttl=$TTL;
-                    };
-                    :set isFound true;
-                    :set IPv4;
+            :if ($type = "A") do={ :set address $IPv4 };
+            :if ($type = "AAAA") do={ :set address $IPv6 };
+            :if ([:len $address] != 0) do={
+                :if ([get $record address] != $address) do={
+                    :log info "change $type dns record for $host";
+                    set $record address=$address;
                 };
-            };
-            :if ($type = "AAAA") do={
-                :if ([:len $IPv6] != 0) do={
-                    :if ([get $record address] != $IPv6) do={
-                        :log info "change $type dns record for $host";
-                        set $record address=$IPv6;
-                    };
-                    :if ([get $record ttl] != $TTL) do={
-                        set $record ttl=$TTL;
-                    };
-                    :set isFound true;
-                    :set IPv6;
+                :if ([get $record ttl] != $ttl) do={
+                    set $record ttl=$ttl;
                 };
+                :if ($type = "A") do={ :set IPv4 };
+                :if ($type = "AAAA") do={ :set IPv6 };
+                :set isFound true;
             };
             :if (!$isFound) do={
                 :log info "remove $type dns record for $host";
@@ -282,17 +276,13 @@
             };
         };
         # new dns records
-        :if ([:len $IPv4] != 0) do={
-            :set type "A";
-            :log info "add $type dns record for $host";
-            add type=$type address=$IPv4 name=$host ttl=$TTL;
-            :set IPv4;
-        };
-        :if ([:len $IPv6] != 0) do={
-            :set type "AAAA";
-            :log info "add $type dns record for $host";
-            add type=$type address=$IPv6 name=$host ttl=$TTL;
-            :set IPv6;
+        :foreach type in={"A";"AAAA"} do={
+            :if ($type = "A") do={ :set address $IPv4 };
+            :if ($type = "AAAA") do={ :set address $IPv6 };
+            :if ([:len $address] != 0) do={
+                :log info "add $type dns record for $host";
+                add type=$type address=$address name=$host ttl=$ttl;
+            };
         };
     };
 };

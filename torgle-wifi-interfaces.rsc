@@ -1,7 +1,12 @@
 # torgle wireless access point interfaces
 
-:local filter "5g";
-:local action "disable";
+# SCHEDULER
+# :global action "disable"; :global filter "5g";
+# /system script run "torgle-wifi-interfaces";
+# :set action; :set filter;
+
+:global filter;
+:global action;
 
 /interface wifiwave2;
 :log info "$action wireless $filter interfaces";

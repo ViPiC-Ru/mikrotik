@@ -1,12 +1,16 @@
 # backup system config
 
+/system script run "init-global-values";
+
+:global "PATH_BACKUP";
+:global "ENABLE_BACKUP_PACKAGE";
+
 :local isFound;
 :local value;
 :local version;
 :local architecture;
-
-:local path "{path-for-backup-folder}";
-:local isNeedPackage true;
+:local path $"PATH_BACKUP";
+:local isNeedPackage $"ENABLE_BACKUP_PACKAGE";
 
 :log info "backup system config";
 # add device name to path
@@ -21,7 +25,7 @@ export file="$path/startup.rsc" show-sensitive;
 save dont-encrypt=yes name="$path/system.backup";
 # back user manager database
 /system package;
-:foreach package in=[find where name=user-manager] do={
+:foreach package in=[find where name="user-manager"] do={
     /user-manager database;
     save name="$path/user-manager.umb" overwrite=yes;
 };
