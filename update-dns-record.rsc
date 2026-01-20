@@ -233,8 +233,10 @@
         :foreach address in=[get $interfaceName address] do={
             :if ([:typeof $address] = "ip6-prefix") do={
                 :set value [get $interfaceName comment];
-                :set value [:pick $value ([:find $value " - "] + 3) [:len $value]];
-                :set IPv6 $value;
+                :if ([:typeof [:find $value " - "]] != "nil") do={
+                    :set value [:pick $value ([:find $value " - "] + 3) [:len $value]];
+                    :set IPv6 $value;
+                };
             };
         };
     };
