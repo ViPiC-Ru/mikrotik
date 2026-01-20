@@ -4,19 +4,23 @@
 
 :global "PATH_BACKUP";
 :global "ENABLE_BACKUP_PACKAGE";
+:global "ENABLE_BACKUP_PATH_IDENTITY";
 
 :local isFound;
 :local value;
 :local version;
 :local architecture;
 :local path $"PATH_BACKUP";
+:local isAddIdentity $"ENABLE_BACKUP_PATH_IDENTITY";
 :local isNeedPackage $"ENABLE_BACKUP_PACKAGE";
 
 :log info "backup system config";
 # add device name to path
-/system identity;
-:set value [get name];
-:set path "$path/$value";
+:if ($isAddIdentity) do={
+    /system identity;
+    :set value [get name];
+    :set path "$path/$value";
+};
 # back startup config
 /;
 export file="$path/startup.rsc" show-sensitive;
