@@ -1,5 +1,7 @@
 # initialize global variables for all scripts
 
+:global "ENABLE_AUTO_UPDATE" true;
+
 :global "ENABLE_BACKUP_PACKAGE" true;
 :global "ENABLE_BACKUP_PATH_IDENTITY" true;
 :global "PATH_BACKUP" "usb1/home.local/MikroTik/Config";

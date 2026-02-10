@@ -1,8 +1,13 @@
 # update or reboot
 
+/system script run "init-global-values";
+
+:global "ENABLE_AUTO_UPDATE";
+:local isAllowUpdate $"ENABLE_AUTO_UPDATE";
+
 /system package update;
 check-for-updates;
-:if ([get installed-version] != [get latest-version]) do={
+:if ($isAllowUpdate && [get installed-version] != [get latest-version]) do={
     :log info "update system";
     install;
 } else={
