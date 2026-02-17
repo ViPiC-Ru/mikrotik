@@ -14,7 +14,6 @@
 :local value;
 :local addressList;
 :local interfaceName;
-:local prefix 128;
 :local cgnatNetwork 100.64.0.0;
 :local cgnatNetmask 255.192.0.0;
 :local inetInterfaceList $"LIST_IFACE_INTERNET";
@@ -119,7 +118,7 @@
     # processing ipv6 firewall list
     /ipv6 firewall address-list;
     :set address $IPv6;
-    :if ([:len $address] != 0) do={ :set address "$address/$prefix" };
+    :if ([:len $address] != 0) do={ :set address "$address/128" };
     :foreach record in=[find where !disabled !dynamic comment=$interfaceName] do={
         :if ([get $record list] = $addressList) do={
             :if ([:len $address] != 0) do={
