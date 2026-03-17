@@ -15,4 +15,5 @@
 - `sync-user-account.rsc` - Cинхронизация аккаунтов пользователей в разные модули.
 - `update-internet-info.rsc` - Обновление информации об выходе в интернет.
 - `update-dns-record.rsc` - Синхронизация DNS с DHCP, IPsec, WireGuard и т.д.
+- `update-ddns-record` - Обновление DNS записи на стороннем DDNS сервисе. 
 - `update-or-reboot-system.rsc` - Обновление или перезагрузка устройства.
