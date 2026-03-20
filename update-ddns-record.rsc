@@ -1,20 +1,21 @@
 # update ddns record
 
-/system script run "init-global-values";
+# SCHEDULER
+# :global service "duckdns";
+# :global mode "ipv4"; :global domain "xxx";
+# :global token "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+# /system script run "update-ddns-record";
+# :set service; :set mode; :set domain; :set token;
 
-:global "NAME_DDNS_SERVICE";
-:global "TOKEN_DDNS_ACCOUNT";
-:global "DOMAIN_DDNS_RECORD";
-:global "MODE_DDNS_UPDATE";
+:global service;
+:global domain;
+:global token;
+:global mode;
 
 :local url;
 :local IPv4;
 :local IPv6;
 :local query;
-:local service $"NAME_DDNS_SERVICE";
-:local token $"TOKEN_DDNS_ACCOUNT";
-:local domain $"DOMAIN_DDNS_RECORD";
-:local mode $"MODE_DDNS_UPDATE";
 
 # get public ip addresses
 /ip cloud;

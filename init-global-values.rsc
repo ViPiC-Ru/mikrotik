@@ -18,8 +18,3 @@
 :global "TIME_BAN" 01:00:00;
 
 :global "ENABLE_CGNAT_RECONNECT" true;
-
-:global "NAME_DDNS_SERVICE" "duckdns";
-:global "TOKEN_DDNS_ACCOUNT" "xxx-xxx-xxx";
-:global "DOMAIN_DDNS_RECORD" "xxx";
-:global "MODE_DDNS_UPDATE" "ipv4";
